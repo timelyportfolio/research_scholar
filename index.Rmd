@@ -1,0 +1,111 @@
+---
+title: Fama as Measured by Google Scholar | rCharts + dygraphs
+framework: bootplus
+layout: poststripped
+mode: selfcontained
+highlighter: prettify
+hitheme    : twitter-bootstrap
+navbar:
+  title: Eugene Fama, dygraphs, rCharts, scholar
+lead : >
+  October 25, 2013
+assets:
+  css:
+  - "http://fonts.googleapis.com/css?family=Raleway:300"
+  - "http://fonts.googleapis.com/css?family=Oxygen"
+  jshead:
+  - "./lodash.js"
+  - "./dygraph-combined.js"
+--- 
+### Random Collection ... Love d3 but ...
+
+If this seems like a random collection of experiments, it is.
+
+I love my d3 and svg, but sometimes with "big" data it gets a little sluggish.  An older battle-tested canvas-based HTML5 library [`dygraphs`](http://dygraphs.com) claims
+
+<blockquote>
+Handles huge data sets: dygraphs plots millions of points without getting bogged down.
+</blockquote>
+
+Before we can test the claim I thought I would try first to plug [`dygraphs`](http://dygraphs.com) into [`rCharts`](http://rcharts.io) much like the rCharts author Ramnath Vaidyanathan explains [here](http://rcharts.io/howitworks) and in [part 2](http://rcharts.io/howitworks/part2).  Also, why not try out the new R package [`scholar`](http://www.jameskeirstead.ca/blog/new-r-package-scholar/) while we are at it to pay homage to Eugene Fama and his new Nobel Prize.
+
+---
+### R package scholar
+James Keirstead's new R package [`scholar`](http://www.jameskeirstead.ca/blog/new-r-package-scholar/) offers Google scholar data in a very easy format.  As you can see below the code is very simple.  One little nuisance I found though is that not all researchers (like Ken French) have Google ids, and even if they do, we have to find them [manually](http://scholar.google.com/citations?user=yP7euFUAAAAJ&hl=en).
+
+```{r echo=F, warning=F, error=F, message=F, cache = F}
+require(knitr)
+opts_chunk$set(
+  echo=T,
+  warning=F,
+  error=F, 
+  message=F,
+  cache = F,
+  results = 'asis',
+  fig.width = 11,
+  fig.height = 4
+)
+```
+
+```{r}
+# Fama from Google Scholar
+# http://scholar.google.com/citations?user=yP7euFUAAAAJ&hl=en
+# yP7euFUAAAAJ
+
+# French from Google Scholar
+# does not exist
+
+library(scholar)
+famaId = "yP7euFUAAAAJ"
+fama.df <- compare_scholar_careers(famaId)
+plot(fama.df$cites~fama.df$year, type = "p")
+abline(lm(fama.df$cites~fama.df$year), col="green")
+title(main = "Eugene Fama | Cites By Year", adj = 0.05, outer=TRUE, line = -2)
+```
+---
+### Plot with rCharts Using dygraphs
+Everything is better when it is interactive.  Let's expose `dygraphs` to `rCharts` for now as a custom implementation.
+
+<div class = 'row'>
+  <div id = "dygraphCite" class = 'span8' style = 'height:300px;'>
+  </div>
+</div>
+<br>
+
+```{r}
+library(rCharts)
+
+fama.df$date <- paste0(
+  "#! new Date(",
+  as.numeric(as.POSIXct(paste0(fama.df$year,"-12-31"))) * 1000,
+  ")!#"
+)
+
+dy1 <- rCharts$new()
+dy1$setLib( "." )
+dy1$templates$script = "chart.html"
+dy1$set(
+  data = fama.df,
+  x = "date",
+  y = "cites",
+  chart = list(
+    title = "Eugene Fama - Career in Citations from Google Scholar",
+    ylabel = "Citations",
+    showRangeSelector = TRUE,
+    labelsDivStyles= list(
+      background = 'none'
+    ),
+    strokeWidth = 1.5
+  )
+)
+cat(noquote(dy1$html( chartId = "dygraphCite" )))
+```
+
+So far I am very impressed with `dygraphs` and look forward to more thoroughly testing it especially with larger data sets.  Take a look at the [gallery](http://dygraphs.com/gallery/) to see its full power, mostly out of the box and accessible even with this basic rCharts implementation.  Also, there is a very lively [Google group of dygraphs-users](https://groups.google.com/forum/#!forum/dygraphs-users).
+
+---
+### Thanks
+- [Ramnath Vaidyanathan](http://twitter.com/ramnath_vaidya)
+- [James Keirstead](http://www.jameskeirstead.ca/)
+- Dan, Alistair, Robert, and Klaus - dygraphs contributors
+- [Marcello Palmitessa](http://aozora.github.io/bootplus/)

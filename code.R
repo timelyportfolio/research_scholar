@@ -27,7 +27,15 @@ dy1$templates$script = "chart.html"
 dy1$set(
   data = fama.df,
   x = "date",
-  y = "cites"#,
-  #chart = list(rollPeriod = 10)
+  y = "cites",
+  chart = list(
+    title = "Eugene Fama - Career in Citations from Google Scholar",
+    ylabel = "Citations",
+    showRangeSelector = TRUE,
+    labelsDivStyles= list(
+      background = 'none'
+    ),
+    strokeWidth = 1.5
+  )
 )
 dy1
