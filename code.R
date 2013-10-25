@@ -15,10 +15,19 @@ fama.df <- compare_scholar_careers(famaId)
 
 library(rCharts)
 
+fama.df$date <- paste0(
+  "#! new Date(",
+  as.numeric(as.POSIXct(paste0(fama.df$year,"-12-31"))) * 1000,
+  ")#!"
+)
+
 dy1 <- rCharts$new()
 dy1$setLib( "." )
 dy1$templates$script = "chart.html"
 dy1$set(
-  data = fama.df
+  data = fama.df,
+  x = "date",
+  y = "cites"#,
+  #chart = list(rollPeriod = 10)
 )
 dy1
