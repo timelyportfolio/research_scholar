@@ -18,7 +18,7 @@ library(rCharts)
 fama.df$date <- paste0(
   "#! new Date(",
   as.numeric(as.POSIXct(paste0(fama.df$year,"-12-31"))) * 1000,
-  ")#!"
+  ")!#"
 )
 
 dy1 <- rCharts$new()
